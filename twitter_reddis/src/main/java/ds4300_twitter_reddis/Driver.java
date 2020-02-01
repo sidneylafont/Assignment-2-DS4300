@@ -17,22 +17,35 @@ public class Driver {
   private static TwitterDatabaseAPI api = new TwitterDatabaseReddis();
 
   public static void main(String[] args) throws Exception {
-    //api.reset();
-    Boolean strategy = false;
-    //insertAllFollowers();
-    //program_post_tweets(strategy);
+    api.reset();
+    Boolean strategy = true;
+    insertAllFollowers();
+    program_post_tweets(strategy);
+    getRandomTimelines(strategy);
 
-    List<Tweet> timeline = api.getHomeTimeline(10, strategy);
-    //about 4 min for getHomeTimeline(10, false)
 
-    for (Tweet t: timeline) {
-      System.out.println(t.toString());
+
+
+  }
+
+  /**
+   * Randomly gets 20 home timelines
+   * @param strategy is the strategy for retreiving the home timeline
+   */
+  private static void getRandomTimelines(boolean strategy) {
+    Random rand = new Random();
+    List<Integer> random_numbers = new ArrayList<Integer>();
+    for (int i = 0; i < 20; i++) {
+      random_numbers.add(rand.nextInt(6000));
     }
 
-
-
-
-
+    Date start = new Date();
+    for (Integer j: random_numbers) {
+      api.getHomeTimeline(j, strategy);
+    }
+    Date end = new Date();
+    //how long it took to get all home timelines
+    System.out.println((end.getTime() - start.getTime()) / 1000);
   }
 
   /**
@@ -48,7 +61,6 @@ public class Driver {
    * creates all the follower objects
    */
   private static List<Follower> createFollowers() {
-    int counter = 0;
     List<Follower> list_of_followers = new ArrayList<Follower>();
     for (int i = 0; i < 6000; i++) {
       float percent_followers = getPercent(i);
@@ -64,8 +76,6 @@ public class Driver {
         int followee = sample_space.remove(0);
         Follower new_follower = new Follower(i, followee);
         list_of_followers.add(new_follower);
-        counter++;
-        System.out.println(counter);
       }
     }
 
@@ -78,17 +88,13 @@ public class Driver {
   private static void insertAllFollowers() {
     List<Follower> followers = createFollowers();
 
-    int counter = 0;
     Date start = new Date();
     for (Follower f: followers) {
       api.insertFollower(f);
-      counter++;
-      System.out.println(counter);
     }
 
     Date end = new Date();
     System.out.println((end.getTime() - start.getTime()) / 1000);
-    //351 seconds for 6288521 followers
   }
 
   /**
@@ -96,11 +102,6 @@ public class Driver {
    * @throws Exception if problem reading in tweets from file
    */
   private static void program_post_tweets(boolean stategy) throws Exception {
-//read in file
-    //put into a list of strings
-    //loop through list of strings, creating a tweet, and putting in a list of tweets
-    //loop through list of tweets, calling postTweet on each while keeping track of total time
-
     List<Tweet> result = new ArrayList<Tweet>();
     BufferedReader br = null;
     int counterTweet = 0;
@@ -130,19 +131,12 @@ public class Driver {
     }
 
     Date start = new Date();
-    System.out.println(start);
-    int counter = 0;
     //looping through prepared list of tweet objects, one by one calling the postTweet method and timing total duration
     for (Tweet t : result) {
       api.postTweet(t, stategy);
-      counter++;
-      System.out.println(counter); // to show how many tweets inserted so far and at what time
     }
     Date end = new Date();
-    System.out.println(end);
     //how long it took to post all tweets
     System.out.println((end.getTime() - start.getTime()) / 1000);
-    //#f strategy took 62 seconds for 1000000 tweets
-    //#t strategy takes __ seconds for 1000000 tweets
   }
 }

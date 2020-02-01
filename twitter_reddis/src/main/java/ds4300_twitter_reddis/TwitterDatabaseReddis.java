@@ -48,29 +48,25 @@ public class TwitterDatabaseReddis implements TwitterDatabaseAPI {
       }
     } else {
       List<Integer> followees = getFollowees(user_id);
-      //int counter = 0;
-      for (Integer i: followees) {
-        //counter++;
-        //System.out.println(counter);
+      for (Integer i : followees) {
         tweets.addAll(getTweets(i));
       }
+    }
 
-      Collections.sort(tweets, new Comparator<Tweet>() {
+    Collections.sort(tweets, new Comparator<Tweet>() {
         public int compare(Tweet event1, Tweet event2) {
           return event2.getTweet_ts().compareTo(event1.getTweet_ts());
         }
-      });
+    });
 
-      List<Tweet> final_10 = new ArrayList<Tweet>();
-      for (int i = 0; i < 10; i++) {
-        final_10.add(tweets.get(i));
-      }
-      return final_10;
+    List<Tweet> final_10 = new ArrayList<Tweet>();
+    for (int i = 0; i < 10; i++) {
+      final_10.add(tweets.get(i));
     }
-
-
-    return null;
+    return final_10;
   }
+
+
 
   public List<Integer> getFollowers(int user_id) {
     Set<String> followers = jedis.smembers("followers:"+user_id);
